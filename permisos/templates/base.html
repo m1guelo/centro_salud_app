@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Centro de Salud{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/logo1.png' %}"
+</head>
+<body>
+
+<nav>
+    <div>
+        <a href="{% url 'home' %}">
+            <img src="{% static 'img/logo.png' %}" alt="Logo Departamento de Salud" style="height: 80px;">
+        </a>
+
+        {% if user.is_authenticated %}
+            <div class="dropdown">
+                <a href="#">Solicitudes de Permiso</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'request_permission' %}">Feriado Legal</a>
+                    <a href="{% url 'admin_permission_request' %}">Permiso Administrativo</a>
+                    <a href="{% url 'compensation_request' %}">Compensación de Tiempo</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <a href="#">Mis solicitudes</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'user_permission_status_feriado' %}">Feriado Legal</a>
+                    <a href="{% url 'user_permission_status_administrativo' %}">Permiso Administrativo</a>
+                    <a href="{% url 'user_permission_status_compensacion' %}">Compensación de Tiempo</a>
+                </div>
+            </div>
+
+            {% if user.is_staff %}
+                <div class="dropdown">
+                    <a href="#">Listado de Permisos</a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'regular_permission_list' %}">Feriado Legal</a>
+                        <a href="{% url 'admin_permission_list' %}">Permiso Administrativo</a>
+                        <a href="{% url 'compensation_request_list' %}">Compensación de Tiempo</a>
+                    </div>
+                </div>
+                <a href="{% url 'user_management' %}">Gestión de Usuarios</a>
+            {% endif %}
+        {% endif %}
+    </div>
+    
+    <div class="nav-links">
+        {% if user.is_authenticated %}
+            <a href="{% url 'signout' %}">Cerrar Sesión</a>
+        {% else %}
+            <a href="{% url 'signin' %}">Iniciar Sesión</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

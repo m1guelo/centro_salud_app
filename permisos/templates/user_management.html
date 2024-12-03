@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    <h2>Gestión de Usuarios</h2>
+
+    <!-- Botón para Crear Usuario -->
+    <div class="action-buttons">
+        <a href="{% url 'create_user' %}" class="btn btn-primary">Crear Usuario</a>
+    </div>
+
+    <!-- Tabla de Usuarios -->
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre Completo</th>
+                <th>RUT</th>
+                <th>Cargo</th>
+                <th>Establecimiento</th>
+                <th>Permisos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.full_name|default:"No especificado" }}</td>
+                <td>{{ user.rut|default:"No especificado" }}</td>
+                <td>{{ user.position|default:"No especificado" }}</td>
+                <td>{{ user.establishment|default:"No especificado" }}</td>
+                <td>{{ user.permissions|default:"No asignado" }}</td>
+                <td class="action-buttons">
+                    <a href="{% url 'edit_user' user.user.id %}">Editar</a> |
+                    <a href="{% url 'delete_user' user.user.id %}" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No hay usuarios registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

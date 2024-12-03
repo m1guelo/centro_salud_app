@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compensación de Tiempo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            text-align: center;
+            color: #27599d;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .field {
+            margin-bottom: 10px;
+        }
+        .field strong {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Compensación de Tiempo</h1>
+
+    <div class="section">
+        <h2>Detalles del Solicitante</h2>
+        <div class="field"><strong>Nombre completo:</strong> {{ compensation_request.full_name }}</div>
+        <div class="field"><strong>RUT:</strong> {{ compensation_request.rut }}</div>
+        <div class="field"><strong>Cargo:</strong> {{ compensation_request.position }}</div>
+        <div class="field"><strong>Establecimiento:</strong> {{ compensation_request.establishment }}</div>
+    </div>
+
+    <div class="section">
+        <h2>Detalles de la Compensación</h2>
+        <div class="field"><strong>Fecha desde:</strong> {{ compensation_request.date_from }}</div>
+        <div class="field"><strong>Fecha hasta:</strong> {{ compensation_request.date_to }}</div>
+        <div class="field"><strong>Horario desde:</strong> {{ compensation_request.time_from }}</div>
+        <div class="field"><strong>Horario hasta:</strong> {{ compensation_request.time_to }}</div>
+    </div>
+
+    <div class="section">
+        <h2>Estado y Firma</h2>
+        <div class="field"><strong>Estado:</strong> {{ compensation_request.estado }}</div>
+        {% if compensation_request.firma_funcionario %}
+        <div class="field"><strong>Firma del Administrador:</strong></div>
+        <img src="{{ compensation_request.firma_funcionario.url }}" alt="Firma" width="200">
+        {% else %}
+        <div class="field"><strong>Firma del Administrador:</strong> No disponible</div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitud de Compensación de Tiempo{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Solicitud de Compensación de Tiempo</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="full_name">{{ form.full_name.label }}:</label>
+                {{ form.full_name }}
+            </div>
+            <div class="form-group">
+                <label for="rut">{{ form.rut.label }}:</label>
+                {{ form.rut }}
+            </div>
+            <div class="form-group">
+                <label for="position">{{ form.position.label }}:</label>
+                {{ form.position }}
+            </div>
+            <div class="form-group">
+                <label for="establishment">{{ form.establishment.label }}:</label>
+                {{ form.establishment }}
+            </div>
+            <div class="form-group">
+                <label for="number_of_hours">{{ form.number_of_hours.label }}:</label>
+                {{ form.number_of_hours }}
+            </div>
+            <div class="form-group">
+                <label for="date_from">{{ form.date_from.label }}:</label>
+                {{ form.date_from }}
+            </div>
+            <div class="form-group">
+                <label for="date_to">{{ form.date_to.label }}:</label>
+                {{ form.date_to }}
+            </div>
+            <div class="form-group">
+                <label for="time_from">{{ form.time_from.label }}:</label>
+                {{ form.time_from }}
+            </div>
+            <div class="form-group">
+                <label for="time_to">{{ form.time_to.label }}:</label>
+                {{ form.time_to }}
+            </div>
+            <div class="form-group">
+                <label for="firma_funcionario">{{ form.firma_funcionario.label }}:</label>
+                {{ form.firma_funcionario }}
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit">Enviar Solicitud</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

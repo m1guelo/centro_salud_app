@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitud de Feriado Legal{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Solicitud de Feriado Legal</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="full_name">{{ form.full_name.label }}:</label>
+                {{ form.full_name }}
+            </div>
+            <div class="form-group">
+                <label for="rut">{{ form.rut.label }}:</label>
+                {{ form.rut }}
+            </div>
+            <div class="form-group">
+                <label for="position">{{ form.position.label }}:</label>
+                {{ form.position }}
+            </div>
+            <div class="form-group">
+                <label for="establishment">{{ form.establishment.label }}:</label>
+                {{ form.establishment }}
+            </div>
+            <div class="form-group">
+                <label for="date_from">{{ form.date_from.label }}:</label>
+                {{ form.date_from }}
+            </div>
+            <div class="form-group">
+                <label for="date_to">{{ form.date_to.label }}:</label>
+                {{ form.date_to }}
+            </div>
+            <div class="form-group">
+                <label for="period">{{ form.period.label }}:</label>
+                {{ form.period }}
+            </div>
+            <div class="form-group">
+                <label for="firma_funcionario">{{ form.firma_funcionario.label }}:</label>
+                {{ form.firma_funcionario }}
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

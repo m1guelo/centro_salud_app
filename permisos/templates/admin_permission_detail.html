@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Autorizar Solicitud de Permiso Administrativo{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Autorizar Solicitud de Permiso Administrativo</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-grid">
+            <!-- Estado de la Solicitud -->
+            <div class="form-group">
+                <label for="estado">Estado:</label>
+                <div class="radio-group">
+                    <label for="estado_autorizado" class="radio-option">
+                        <input type="radio" id="estado_autorizado" name="estado" value="autorizado"
+                            {% if form.instance.estado == 'autorizado' %}checked{% endif %}>
+                        <span>Autorizar</span>
+                    </label>
+                    <label for="estado_no_autorizado" class="radio-option">
+                        <input type="radio" id="estado_no_autorizado" name="estado" value="no_autorizado"
+                            {% if form.instance.estado == 'no_autorizado' %}checked{% endif %}>
+                        <span>No Autorizar</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tipo de Solicitud -->
+            <div class="form-group">
+                <label for="tipo_solicitud">Tipo de Solicitud:</label>
+                <div class="radio-group">
+                    <label for="anticipado" class="radio-option">
+                        <input type="radio" id="anticipado" name="tipo_solicitud" value="anticipado"
+                            {% if form.instance.anticipado %}checked{% endif %}>
+                        <span>Anticipado</span>
+                    </label>
+                    <label for="postergado" class="radio-option">
+                        <input type="radio" id="postergado" name="tipo_solicitud" value="postergado"
+                            {% if form.instance.postergado %}checked{% endif %}>
+                        <span>Postergado</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Fecha Desde -->
+            <div class="form-group">
+                <label for="date_from">Fecha Desde:</label>
+                <input type="date" id="date_from" name="date_from" class="form-control" value="{{ form.instance.date_from }}">
+            </div>
+
+            <!-- Fecha Hasta -->
+            <div class="form-group">
+                <label for="date_to">Fecha Hasta:</label>
+                <input type="date" id="date_to" name="date_to" class="form-control" value="{{ form.instance.date_to }}">
+            </div>
+
+            <!-- Firma del Administrador -->
+            <div class="form-group">
+                <label for="firma_funcionario">Firma del Administrador:</label>
+                <input type="file" id="firma_funcionario" name="firma_funcionario" class="form-control">
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Guardar Cambios</button>
+            <a href="{% url 'admin_permission_list' %}" class="btn-submit" style="background-color: #6c757d;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

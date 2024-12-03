@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Estado de Mis Solicitudes{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    <h2>Estado de Mis Solicitudes</h2>
+    
+    <!-- Navegación para cambiar entre los diferentes tipos de solicitudes -->
+    <div class="request-type-nav">
+        <a href="{% url 'user_permission_status' 'FERIADO' %}">Feriado Legal</a> |
+        <a href="{% url 'user_permission_status' 'ADMINISTRATIVO' %}">Permiso Administrativo</a> |
+        <a href="{% url 'user_permission_status' 'COMPENSACION' %}">Compensación de Tiempo</a>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>RUT</th>
+                <th>Tipo de Solicitud</th>
+                <th>Fecha Desde</th>
+                <th>Fecha Hasta</th>
+                <th>Estado</th>
+                <th>Descargas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for permission in permissions %}
+            <tr>
+                <td>{{ permission.full_name }}</td>
+                <td>{{ permission.rut }}</td>
+                <td>
+                    {% if permission.request_type == 'FERIADO' %}
+                        Solicitud de Feriado Legal
+                    {% elif permission.request_type == 'ADMINISTRATIVO' %}
+                        Permiso Administrativo
+                    {% elif permission.request_type == 'COMPENSACION' %}
+                        Compensación de Tiempo
+                    {% endif %}
+                </td>
+                <td>{{ permission.date_from }}</td>
+                <td>{{ permission.date_to }}</td>
+                <td class="status-{{ permission.estado|lower }}">
+                    {{ permission.estado|title }}
+                </td>
+                <td class="download-link">
+                    {% if permission.request_type == 'FERIADO' %}
+                        <a href="{% url 'generate_user_permission_pdf' permission.id %}">Descargar PDF</a>
+                    {% elif permission.request_type == 'ADMINISTRATIVO' %}
+                        <a href="{% url 'generate_admin_permission_pdf' permission.id %}">Descargar PDF</a>
+                    {% elif permission.request_type == 'COMPENSACION' %}
+                        <a href="{% url 'generate_compensation_request_pdf' permission.id %}">Descargar PDF</a>
+                    {% else %}
+                        No disponible
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No hay solicitudes registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

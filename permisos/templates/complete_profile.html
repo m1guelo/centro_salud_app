@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Completar Perfil{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Completar Perfil</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="full_name">Nombre completo:</label>
+        {{ form.full_name }}
+        
+        <label for="rut">RUT:</label>
+        {{ form.rut }}
+        
+        <label for="firma">Firma:</label>
+        {{ form.firma }}
+        
+        <button type="submit">Guardar</button>
+    </form>
+</div>
+{% endblock %}

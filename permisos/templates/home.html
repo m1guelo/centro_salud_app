@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <h1>Bienvenido a la Página Principal</h1>
+    <p class="welcome-message">Seleccione una de las opciones para acceder al listado o formulario que necesite:</p>
+    
+    <div class="request-options">
+        <a href="{% url 'regular_permission_list' %}" class="button">Listado de Solicitudes de Feriado Legal</a>
+        <a href="{% url 'admin_permission_list' %}" class="button">Listado de Solicitudes de Permiso Administrativo</a>
+        <a href="{% url 'compensation_request' %}" class="button">Formulario de Solicitud de Compensación de Tiempo</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Listado de Solicitudes de Feriado Legal{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    <h2>Listado de Solicitudes de Feriado Legal</h2>
+    <form method="GET" action="{% url 'regular_permission_list' %}" class="search-form">
+        <input type="text" name="q" value="{{ query }}" placeholder="Buscar por nombre o RUT">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>RUT</th>
+                <th>Número de Días</th>
+                <th>Fecha Desde</th>
+                <th>Fecha Hasta</th>
+                <th>Periodo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for permission in regular_permissions %}
+            <tr>
+                <td>{{ permission.full_name }}</td>
+                <td>{{ permission.rut }}</td>
+                <td>{{ permission.number_of_days }}</td>
+                <td>{{ permission.date_from }}</td>
+                <td>{{ permission.date_to }}</td>
+                <td>{{ permission.period }}</td>
+                <td>{{ permission.estado|title }}</td>
+                <td>
+                    <a href="{% url 'regular_permission_detail' permission.id %}">Autorizar/Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">No se encontraron solicitudes de permisos.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    
+</div>
+{% endblock %}

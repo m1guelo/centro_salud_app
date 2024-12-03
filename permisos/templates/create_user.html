@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Usuario{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Crear Nuevo Usuario</h2>
+    <form method="POST" class="styled-form">
+        {% csrf_token %}
+        <!-- Renderiza el formulario con etiquetas y estilos -->
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="error-messages">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <!-- Botón de envío -->
+        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+    </form>
+
+    <!-- Botón para volver -->
+    <div class="back-link">
+        <a href="{% url 'user_management' %}" class="btn btn-secondary">Volver a la Gestión de Usuarios</a>
+    </div>
+</div>
+{% endblock %}

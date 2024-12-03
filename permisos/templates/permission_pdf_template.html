@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Feriado Legal</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 40px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1 {
+            text-align: center;
+            color: #27599d;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #27599d;
+            font-size: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .field {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .field strong {
+            color: #555;
+        }
+
+        .signature {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .signature img {
+            max-width: 200px;
+            max-height: 100px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Solicitud de Feriado Legal</h1>
+
+        <div class="section">
+            <h2>Detalles de la Solicitud</h2>
+            <div class="field"><strong>Nombre completo:</strong> {{ permission.full_name }}</div>
+            <div class="field"><strong>RUT:</strong> {{ permission.rut }}</div>
+            <div class="field"><strong>Cargo:</strong> {{ permission.position }}</div>
+            <div class="field"><strong>Establecimiento:</strong> {{ permission.establishment }}</div>
+        </div>
+
+        <div class="section">
+            <h2>Detalles del Permiso</h2>
+            <div class="field"><strong>Fecha desde:</strong> {{ permission.date_from }}</div>
+            <div class="field"><strong>Fecha hasta:</strong> {{ permission.date_to }}</div>
+            <div class="field"><strong>Periodo:</strong> {{ permission.period }}</div>
+        </div>
+
+        <div class="section">
+            <h2>Estado y Firma</h2>
+            <div class="field"><strong>Estado:</strong> {{ permission.estado }}</div>
+            <div class="field"><strong>Fecha Desde (Administrador):</strong> {{ permission.additional_date_from }}</div>
+            <div class="field"><strong>Fecha Hasta (Administrador):</strong> {{ permission.additional_date_to }}</div>
+
+            <div class="signature">
+                {% if permission.firma_funcionario %}
+                <div class="field"><strong>Firma del Administrador:</strong></div>
+                <img src="{{ permission.firma_funcionario.url }}" alt="Firma del Administrador">
+                {% else %}
+                <div class="field"><strong>Firma del Administrador:</strong> No disponible</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="footer">
+            Documento generado automáticamente por el sistema de permisos. <br>
+            Todos los derechos reservados.
+        </div>
+    </div>
+</body>
+</html>

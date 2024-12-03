@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h2>Inicie Sesión</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+        <div class="form-group">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
+        <button type="submit" class="btn-login">Iniciar Sesión</button>
+    </form>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="login-message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if form.errors %}
+        <div class="error-message">Nombre de usuario o contraseña incorrectos.</div>
+    {% endif %}
+</div>
+{% endblock %}
