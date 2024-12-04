@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
+from .decorators import user_is_admin, user_is_personal_administrativo, user_is_normal
 from django import forms
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -26,12 +27,6 @@ from .models import (
     CompensationRequest,
     UserProfile,
 )
-
-
-# Función para verificar si el usuario es administrador
-def is_admin(user):
-    return user.is_staff
-
 
 @login_required
 def home(request):
@@ -61,6 +56,17 @@ def signin(request):
                     "error": "El nombre de usuario o contraseña es incorrecto.",
                 },
             )
+
+        if user is not None and not user.is_active:
+            return render(
+                request,
+                "signin.html",
+                {
+                    "form": AuthenticationForm(),
+                    "error": "Tu cuenta está inactiva. Contacta al administrador.",
+                },
+            )
+
         else:
             login(request, user)
             profile, created = UserProfile.objects.get_or_create(user=user)
@@ -83,7 +89,7 @@ def signout(request):
 
 @login_required
 def complete_profile(request):
-    profile = request.user.userprofile
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
     if profile.full_name and profile.rut and profile.firma:
         return redirect("home")
 
@@ -91,6 +97,7 @@ def complete_profile(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
+            messages.success(request, "Perfil completado exitosamente.")
             return redirect("home")
     else:
         form = UserProfileForm(instance=profile)
@@ -98,8 +105,9 @@ def complete_profile(request):
     return render(request, "complete_profile.html", {"form": form})
 
 
+
 @login_required
-@user_passes_test(is_admin)
+@user_is_admin
 def user_management(request):
     # Consulta todos los perfiles y usuarios relacionados
     users = UserProfile.objects.select_related("user").all()
@@ -117,47 +125,23 @@ def user_management(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_is_admin
 def create_user(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            try:
-                # Create the user
-                user = form.save(commit=False)
-                user_type = form.cleaned_data["user_type"]
-
-                # Assign staff permissions for 'admin' user type
-                user.is_staff = user_type == "admin"
-                user.save()
-
-                # Create a user profile with the selected user type
-                UserProfile.objects.create(
-                    user=user,
-                    full_name=form.cleaned_data.get("full_name", ""),
-                    rut=form.cleaned_data.get("rut", ""),
-                    user_type=user_type,
-                )
-
-                messages.success(
-                    request,
-                    f"Usuario {user.username} creado exitosamente como {user_type}.",
-                )
-                return redirect("user_management")
-
-            except IntegrityError:
-                return render(
-                    request,
-                    "create_user.html",
-                    {"form": form, "error": "El nombre de usuario ya existe."},
-                )
+            user = form.save()
+            messages.success(request, f"Usuario {user.username} creado exitosamente.")
+            return redirect("user_management")
+        else:
+            return render(request, "create_user.html", {"form": form, "error": "Error en el formulario."})
     else:
         form = UserRegisterForm()
     return render(request, "create_user.html", {"form": form})
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_is_admin
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
@@ -171,7 +155,7 @@ def edit_user(request, user_id):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_is_admin
 def delete_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
@@ -180,60 +164,43 @@ def delete_user(request, user_id):
     return render(request, "delete_user.html", {"user": user})
 
 
-# Vista de registro de usuarios para administradores
 @login_required
-@user_passes_test(is_admin)
+@user_is_admin
 def signup(request):
-    if request.method == "GET":
-        return render(request, "register.html", {"form": UserRegisterForm()})
-    else:
+    if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            try:
-                user = form.save(commit=False)
-                user.is_staff = form.cleaned_data["user_type"] == "admin"
-                user.save()
-                messages.success(
-                    request, f"Usuario {user.username} creado exitosamente."
-                )
-                return redirect("user_management")
-            except IntegrityError:
-                return render(
-                    request,
-                    "register.html",
-                    {"form": form, "error": "El nombre de usuario ya existe."},
-                )
+            user = form.save()
+            messages.success(request, f"Usuario {user.username} creado exitosamente.")
+            return redirect("user_management")
         else:
-            return render(
-                request,
-                "register.html",
-                {"form": form, "error": "Las contraseñas no coinciden."},
-            )
-
-
-# Utility to check if the user is "personal administrativo"
-def is_personal_administrativo(user):
-    return (
-        hasattr(user, "userprofile")
-        and user.userprofile.user_type == "personal_administrativo"
-    )
+            return render(request, "register.html", {"form": form, "error": "Error en el formulario."})
+    else:
+        form = UserRegisterForm()
+    return render(request, "register.html", {"form": form})
 
 
 @login_required
 def user_permission_status(request, tipo=None):
-    """
-    Muestra las solicitudes de permisos del usuario autenticado, filtradas por tipo.
-    """
+    permissions = []
+
     if tipo == "FERIADO":
-        permissions = PermissionRequest.objects.filter(
-            user=request.user, request_type="FERIADO"
-        )
+        permissions = PermissionRequest.objects.filter(user=request.user, request_type="FERIADO")
     elif tipo == "ADMINISTRATIVO":
-        permissions = PermissionRequestAdmin.objects.filter(user=request.user)
+        # Añadimos `request_type` manualmente para uniformidad
+        permissions = PermissionRequestAdmin.objects.filter(user=request.user).values(
+            "id", "full_name", "rut", "date_from", "date_to", "estado"
+        )
+        for permission in permissions:
+            permission["request_type"] = "ADMINISTRATIVO"
     elif tipo == "COMPENSACION":
-        permissions = CompensationRequest.objects.filter(user=request.user)
+        # Añadimos `request_type` manualmente para uniformidad
+        permissions = CompensationRequest.objects.filter(user=request.user).values(
+            "id", "full_name", "rut", "date_from", "date_to", "estado"
+        )
+        for permission in permissions:
+            permission["request_type"] = "COMPENSACION"
     else:
-        # Si no se especifica tipo, muestra todos los permisos del usuario
         permissions = PermissionRequest.objects.filter(user=request.user)
 
     return render(
@@ -241,6 +208,7 @@ def user_permission_status(request, tipo=None):
         "user_permission_status.html",
         {"permissions": permissions, "tipo": tipo},
     )
+
 
 
 # ----------------------------
@@ -298,26 +266,21 @@ def compensation_request(request):
 # ----------------------------
 # Listados y detalles de permisos
 # ----------------------------
+@login_required
+def list_permissions(request, model, template_name, query_param="q"):
+    query = request.GET.get(query_param, "")
+    permissions = model.objects.filter(
+        Q(full_name__icontains=query) | Q(rut__icontains=query)
+    )
+    return render(request, template_name, {"permissions": permissions, "query": query})
 
 
 @login_required
-@user_passes_test(is_personal_administrativo)
+#@user_passes_test(is_personal_administrativo)
 def regular_permission_list(request):
-    """
-    Lista de permisos regulares (feriado) para usuarios administrativos.
-    """
     query = request.GET.get("q", "")
     regular_permissions = PermissionRequest.objects.filter(
-        Q(full_name__icontains=query) | Q(rut__icontains=query), request_type="FERIADO"
-    ).values(
-        "id",
-        "full_name",
-        "rut",
-        "number_of_days",
-        "date_from",
-        "date_to",
-        "period",
-        "estado",
+        Q(full_name__icontains=query) | Q(rut__icontains=query)
     )
     return render(
         request,
@@ -326,24 +289,12 @@ def regular_permission_list(request):
     )
 
 
+
 @login_required
-@user_passes_test(is_personal_administrativo)
 def admin_permission_list(request):
-    """
-    Lista de permisos administrativos.
-    """
     query = request.GET.get("q", "")
     admin_permissions = PermissionRequestAdmin.objects.filter(
         Q(full_name__icontains=query) | Q(rut__icontains=query)
-    ).values(
-        "id",
-        "full_name",
-        "rut",
-        "number_of_days",
-        "date_from",
-        "date_to",
-        "jornada",
-        "estado",
     )
     return render(
         request,
@@ -352,25 +303,12 @@ def admin_permission_list(request):
     )
 
 
+
 @login_required
-@user_passes_test(is_personal_administrativo)
 def compensation_request_list(request):
-    """
-    Lista de solicitudes de compensación de tiempo.
-    """
     query = request.GET.get("q", "")
     compensation_requests = CompensationRequest.objects.filter(
         Q(full_name__icontains=query) | Q(rut__icontains=query)
-    ).values(
-        "id",
-        "full_name",
-        "rut",
-        "number_of_hours",
-        "date_from",
-        "date_to",
-        "time_from",
-        "time_to",
-        "estado",
     )
     return render(
         request,
@@ -379,8 +317,10 @@ def compensation_request_list(request):
     )
 
 
+
+
+
 @login_required
-@user_passes_test(is_admin)
 def regular_permission_detail(request, permission_id):
     permission = get_object_or_404(PermissionRequest, id=permission_id)
     if request.method == "POST":
@@ -402,7 +342,6 @@ def regular_permission_detail(request, permission_id):
 
 
 @login_required
-@user_passes_test(is_admin)
 def admin_permission_detail(request, permission_id):
     permission = get_object_or_404(PermissionRequestAdmin, id=permission_id)
     if request.method == "POST":
@@ -428,7 +367,6 @@ def admin_permission_detail(request, permission_id):
 
 
 @login_required
-@user_passes_test(is_admin)
 def admin_permission_admin_detail(request, permission_id):
     permission = get_object_or_404(PermissionRequestAdmin, id=permission_id)
     if request.method == "POST":
@@ -452,7 +390,6 @@ def admin_permission_admin_detail(request, permission_id):
 
 
 @login_required
-@user_passes_test(is_admin)
 def compensation_request_detail(request, request_id):
     compensation_request = get_object_or_404(CompensationRequest, id=request_id)
     if request.method == "POST":
@@ -612,7 +549,6 @@ def _generate_pdf(template_name, context, filename):
 
 
 @login_required
-@user_passes_test(is_admin)
 def approve_reject_request(request, request_id):
     """
     Vista para que los administradores aprueben o rechacen solicitudes.

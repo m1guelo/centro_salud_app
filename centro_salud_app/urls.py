@@ -1,7 +1,10 @@
 from django.urls import path
+from django.contrib import admin
 from permisos import views
 
 urlpatterns = [
+    #Admin
+    path('admin/', admin.site.urls),
     # Autenticación y navegación
     path('', views.signin, name='signin'),  # Página de inicio
     path('signup/', views.signup, name='signup'),  # Registro de usuario

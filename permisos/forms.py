@@ -5,7 +5,9 @@ from .models import PermissionRequest, PermissionRequestAdmin, CompensationReque
 
 # Formulario de Registro de Usuario
 class UserRegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(required=True, label="Correo Electrónico")
+    full_name = forms.CharField(max_length=100, required=True, label="Nombre Completo")
+    rut = forms.CharField(max_length=12, required=True, label="RUT")
     user_type = forms.ChoiceField(
         choices=UserProfile.USER_TYPE_CHOICES,
         label="Tipo de Usuario",
@@ -13,15 +15,39 @@ class UserRegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 'user_type']
+        fields = ['username', 'email', 'password1', 'password2', 'user_type', 'full_name', 'rut']
 
     def save(self, commit=True):
+        # Crear el usuario base
         user = super().save(commit=False)
         if commit:
             user.save()
+            # Crear el perfil de usuario relacionado
             user_type = self.cleaned_data['user_type']
-            UserProfile.objects.create(user=user, user_type=user_type)
+            full_name = self.cleaned_data['full_name']
+            rut = self.cleaned_data['rut']
+            UserProfile.objects.create(
+                user=user,
+                full_name=full_name,
+                rut=rut,
+                user_type=user_type,
+            )
         return user
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        # Validar que el email tenga un formato válido (opcionalmente ajusta el dominio)
+        if not email or "@" not in email:
+            raise forms.ValidationError("Ingrese un correo electrónico válido.")
+        return email
+
+    def clean_rut(self):
+        rut = self.cleaned_data.get("rut")
+        # Ejemplo básico de validación del RUT
+        if not rut.isdigit() or len(rut) < 8:
+            raise forms.ValidationError("El RUT debe ser numérico y tener al menos 8 dígitos.")
+        return rut
+
 
 
 # Formulario de Solicitud de Permiso (Usuarios Normales)
@@ -57,6 +83,17 @@ class UserPermissionRequestForm(forms.ModelForm):
             self.fields['rut'].initial = profile.rut
             self.fields['position'].initial = profile.position
             self.fields['establishment'].initial = profile.establishment
+            
+    def clean(self):
+        cleaned_data = super().clean()
+        date_from = cleaned_data.get("date_from")
+        date_to = cleaned_data.get("date_to")
+
+        if date_from and date_to and date_from > date_to:
+            raise forms.ValidationError("La fecha de inicio no puede ser posterior a la fecha de término.")
+    
+        return cleaned_data
+
 
 
 # Formulario de Gestión de Permisos (Usuarios Administrativos)

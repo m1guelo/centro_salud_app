@@ -8,9 +8,9 @@
     
     <!-- Navegación para cambiar entre los diferentes tipos de solicitudes -->
     <div class="request-type-nav">
-        <a href="{% url 'user_permission_status' 'FERIADO' %}">Feriado Legal</a> |
-        <a href="{% url 'user_permission_status' 'ADMINISTRATIVO' %}">Permiso Administrativo</a> |
-        <a href="{% url 'user_permission_status' 'COMPENSACION' %}">Compensación de Tiempo</a>
+        <a href="{% url 'user_permission_status_feriado' %}">Feriado Legal</a> |
+        <a href="{% url 'user_permission_status_administrativo' %}">Permiso Administrativo</a> |
+        <a href="{% url 'user_permission_status_compensacion' %}">Compensación de Tiempo</a>
     </div>
     
     <table>
@@ -31,12 +31,16 @@
                 <td>{{ permission.full_name }}</td>
                 <td>{{ permission.rut }}</td>
                 <td>
-                    {% if permission.request_type == 'FERIADO' %}
-                        Solicitud de Feriado Legal
-                    {% elif permission.request_type == 'ADMINISTRATIVO' %}
-                        Permiso Administrativo
-                    {% elif permission.request_type == 'COMPENSACION' %}
-                        Compensación de Tiempo
+                    {% if permission.request_type %}
+                        {% if permission.request_type == 'FERIADO' %}
+                            Solicitud de Feriado Legal
+                        {% elif permission.request_type == 'ADMINISTRATIVO' %}
+                            Permiso Administrativo
+                        {% elif permission.request_type == 'COMPENSACION' %}
+                            Compensación de Tiempo
+                        {% endif %}
+                    {% else %}
+                        Tipo Desconocido
                     {% endif %}
                 </td>
                 <td>{{ permission.date_from }}</td>
