@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
-from .decorators import user_is_admin, user_is_personal_administrativo, user_is_normal
+from .decorators import user_is_admin, user_is_admin_or_personal_administrativo
 from django import forms
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -107,7 +107,7 @@ def complete_profile(request):
 
 
 @login_required
-@user_is_admin
+#@user_is_admin
 def user_management(request):
     # Consulta todos los perfiles y usuarios relacionados
     users = UserProfile.objects.select_related("user").all()
@@ -123,9 +123,8 @@ def user_management(request):
 
     return render(request, "user_management.html", {"users": users})
 
-
 @login_required
-@user_is_admin
+#@user_is_admin
 def create_user(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
@@ -141,7 +140,7 @@ def create_user(request):
 
 
 @login_required
-@user_is_admin
+#@user_is_admin
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
@@ -155,7 +154,7 @@ def edit_user(request, user_id):
 
 
 @login_required
-@user_is_admin
+#@user_is_admin
 def delete_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
@@ -165,7 +164,7 @@ def delete_user(request, user_id):
 
 
 @login_required
-@user_is_admin
+#@user_is_admin
 def signup(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
@@ -276,7 +275,7 @@ def list_permissions(request, model, template_name, query_param="q"):
 
 
 @login_required
-#@user_passes_test(is_personal_administrativo)
+#@user_is_admin_or_personal_administrativo
 def regular_permission_list(request):
     query = request.GET.get("q", "")
     regular_permissions = PermissionRequest.objects.filter(
@@ -291,6 +290,7 @@ def regular_permission_list(request):
 
 
 @login_required
+#@user_is_admin_or_personal_administrativo
 def admin_permission_list(request):
     query = request.GET.get("q", "")
     admin_permissions = PermissionRequestAdmin.objects.filter(
@@ -303,8 +303,8 @@ def admin_permission_list(request):
     )
 
 
-
 @login_required
+#@user_is_admin_or_personal_administrativo
 def compensation_request_list(request):
     query = request.GET.get("q", "")
     compensation_requests = CompensationRequest.objects.filter(
@@ -321,6 +321,7 @@ def compensation_request_list(request):
 
 
 @login_required
+#@user_is_admin_or_personal_administrativo
 def regular_permission_detail(request, permission_id):
     permission = get_object_or_404(PermissionRequest, id=permission_id)
     if request.method == "POST":
@@ -342,6 +343,7 @@ def regular_permission_detail(request, permission_id):
 
 
 @login_required
+#@user_is_admin_or_personal_administrativo
 def admin_permission_detail(request, permission_id):
     permission = get_object_or_404(PermissionRequestAdmin, id=permission_id)
     if request.method == "POST":
@@ -367,6 +369,7 @@ def admin_permission_detail(request, permission_id):
 
 
 @login_required
+#@user_is_admin_or_personal_administrativo
 def admin_permission_admin_detail(request, permission_id):
     permission = get_object_or_404(PermissionRequestAdmin, id=permission_id)
     if request.method == "POST":
@@ -390,6 +393,7 @@ def admin_permission_admin_detail(request, permission_id):
 
 
 @login_required
+#@user_is_admin_or_personal_administrativo
 def compensation_request_detail(request, request_id):
     compensation_request = get_object_or_404(CompensationRequest, id=request_id)
     if request.method == "POST":
@@ -547,8 +551,8 @@ def _generate_pdf(template_name, context, filename):
     except Exception as e:
         raise RuntimeError(f"Error al generar el PDF: {str(e)}")
 
-
 @login_required
+#@user_is_admin_or_personal_administrativo
 def approve_reject_request(request, request_id):
     """
     Vista para que los administradores aprueben o rechacen solicitudes.
