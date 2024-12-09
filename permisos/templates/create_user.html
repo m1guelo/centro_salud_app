@@ -5,6 +5,14 @@
 {% block content %}
 <div class="form-container">
     <h2>Crear Nuevo Usuario</h2>
+
+    <!-- Mostrar mensajes de error globales -->
+    {% if form.errors %}
+    <div class="global-error-messages">
+        <p>Por favor, corrija los errores a continuación:</p>
+    </div>
+    {% endif %}
+
     <form method="POST" class="styled-form">
         {% csrf_token %}
         <!-- Renderiza el formulario con etiquetas y estilos -->
@@ -12,6 +20,9 @@
         <div class="form-group">
             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
+            {% if field.help_text %}
+            <small class="form-text">{{ field.help_text }}</small>
+            {% endif %}
             {% if field.errors %}
             <div class="error-messages">
                 {{ field.errors }}
@@ -19,7 +30,7 @@
             {% endif %}
         </div>
         {% endfor %}
-        
+
         <!-- Botón de envío -->
         <button type="submit" class="btn btn-primary">Crear Usuario</button>
     </form>

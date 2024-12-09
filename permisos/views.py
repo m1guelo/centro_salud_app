@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from .decorators import user_is_admin, user_is_admin_or_personal_administrativo
@@ -20,6 +20,7 @@ from .forms import (
     AdminPermissionRequestForm,
     CompensationRequestForm,
     UserProfileForm,
+    UserEditForm,
 )
 from .models import (
     PermissionRequest,
@@ -123,45 +124,65 @@ def user_management(request):
 
     return render(request, "user_management.html", {"users": users})
 
+from django.contrib import messages
+
+from django.contrib import messages
+
 @login_required
-#@user_is_admin
 def create_user(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            messages.success(request, f"Usuario {user.username} creado exitosamente.")
-            return redirect("user_management")
+            try:
+                form.save()
+                messages.success(request, "Usuario creado exitosamente.")
+                return redirect("user_management")
+            except Exception as e:
+                messages.error(request, f"Error al crear el usuario: {str(e)}")
         else:
-            return render(request, "create_user.html", {"form": form, "error": "Error en el formulario."})
+            messages.error(request, "Por favor, corrija los errores del formulario.")
     else:
         form = UserRegisterForm()
+
     return render(request, "create_user.html", {"form": form})
 
 
+
 @login_required
-#@user_is_admin
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
+    profile = user.userprofile  # Asegúrate de obtener el perfil relacionado
+
     if request.method == "POST":
-        form = UserRegisterForm(request.POST, instance=user)
+        form = UserEditForm(request.POST, instance=user, profile=profile)
         if form.is_valid():
             form.save()
+            profile.user_type = form.cleaned_data["user_type"]
+            profile.save()
+
+            # Si estás editando el usuario actual, actualiza la sesión
+            if request.user == user:
+                update_session_auth_hash(request, user)
+
+            messages.success(request, "Usuario actualizado exitosamente.")
             return redirect("user_management")
+        else:
+            messages.error(request, "Error al actualizar el usuario. Verifica los datos.")
     else:
-        form = UserRegisterForm(instance=user)
+        form = UserEditForm(instance=user, profile=profile)
+
     return render(request, "edit_user.html", {"form": form})
 
 
+
 @login_required
-#@user_is_admin
 def delete_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
         user.delete()
+        messages.success(request, "Usuario eliminado exitosamente.")
         return redirect("user_management")
     return render(request, "delete_user.html", {"user": user})
-
 
 @login_required
 #@user_is_admin

@@ -11,6 +11,8 @@ urlpatterns = [
     path('signin/', views.signin, name='signin'),  # Inicio de sesión
     path('signout/', views.signout, name='signout'),  # Cierre de sesión
     path('home/', views.home, name='home'),  # Página principal para usuarios autenticados
+    path('register/', views.UserRegisterForm, name='register'),  # Formulario de registro de usuario
+    
 
     # Gestión de usuarios (solo para administradores)
     path('user-management/', views.user_management, name='user_management'),  # Listado de usuarios

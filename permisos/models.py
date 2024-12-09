@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
+def validate_rut(value):
+    normalized_rut = value.replace(".", "").replace("-", "")
+    if not normalized_rut.isdigit() or len(normalized_rut) < 8:
+        raise ValidationError("El RUT debe ser numérico y tener al menos 8 dígitos.")
+    
+    
 class UserProfile(models.Model):
     # User position and department choices
     CARGO_CHOICES = [
@@ -69,7 +76,7 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField("Nombre completo", max_length=100)
-    rut = models.CharField("RUT", max_length=12)
+    rut = models.CharField("RUT", max_length=12, validators=[validate_rut])
     position = models.CharField("Cargo", max_length=50, choices=CARGO_CHOICES, null=True, blank=True)
     establishment = models.CharField("Establecimiento", max_length=100, choices=DEPARTAMENTO_CHOICES, null=True, blank=True)
     user_type = models.CharField("Tipo de Usuario", max_length=50, choices=USER_TYPE_CHOICES, default='usuario_normal')
@@ -78,8 +85,6 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.get_user_type_display()}"
-
-
 
 class PermissionRequest(models.Model):
     # Opciones específicas para el estado y tipo de solicitud
@@ -93,7 +98,7 @@ class PermissionRequest(models.Model):
     # Relaciones y datos básicos del usuario que realiza la solicitud
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="permission_requests")
     full_name = models.CharField("Nombre completo", max_length=100)
-    rut = models.CharField("RUT", max_length=12)
+    rut = models.CharField("RUT", max_length=12, validators=[validate_rut])
     position = models.CharField("Cargo", max_length=50, choices=UserProfile.CARGO_CHOICES)
     establishment = models.CharField("Establecimiento", max_length=100, choices=UserProfile.DEPARTAMENTO_CHOICES)
     
@@ -131,6 +136,8 @@ class PermissionRequest(models.Model):
         return f"{self.full_name} - {self.request_type} - {self.number_of_days} días desde {self.date_from} - Estado: {self.estado}"
 
 
+
+
 class PermissionRequestAdmin(models.Model):
     CARGO_CHOICES = UserProfile.CARGO_CHOICES
     DEPARTAMENTO_CHOICES = UserProfile.DEPARTAMENTO_CHOICES
@@ -143,7 +150,7 @@ class PermissionRequestAdmin(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     full_name = models.CharField("Nombre completo", max_length=100)
-    rut = models.CharField("RUT", max_length=12)
+    rut = models.CharField("RUT", max_length=12, validators=[validate_rut])
     position = models.CharField("Cargo", max_length=50, choices=CARGO_CHOICES)
     establishment = models.CharField("Establecimiento", max_length=100, choices=DEPARTAMENTO_CHOICES)
     number_of_days = models.PositiveIntegerField("Número de días")
@@ -164,7 +171,7 @@ class CompensationRequest(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     full_name = models.CharField("Nombre completo", max_length=100)
-    rut = models.CharField("RUT", max_length=12)
+    rut = models.CharField("RUT", max_length=12, validators=[validate_rut])
     position = models.CharField("Cargo", max_length=50, choices=UserProfile.CARGO_CHOICES)
     establishment = models.CharField("Establecimiento", max_length=100, choices=UserProfile.DEPARTAMENTO_CHOICES)
     number_of_hours = models.PositiveIntegerField("Número de horas")
@@ -189,7 +196,7 @@ class Permission(models.Model):
     ]
 
     full_name = models.CharField(max_length=100)
-    rut = models.CharField(max_length=12)
+    rut = models.CharField("RUT", max_length=12, validators=[validate_rut])
     date_from = models.DateField()
     date_to = models.DateField()
     estado = models.CharField(max_length=20, default='pendiente')
@@ -198,3 +205,4 @@ class Permission(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.get_request_type_display()}"
+    

@@ -30,7 +30,13 @@
                 <td>{{ user.rut|default:"No especificado" }}</td>
                 <td>{{ user.position|default:"No especificado" }}</td>
                 <td>{{ user.establishment|default:"No especificado" }}</td>
-                <td>{{ user.permissions|default:"No asignado" }}</td>
+                <td>
+                    {% if user.user_type %}
+                        {{ user.get_user_type_display }}
+                    {% else %}
+                        No asignado
+                    {% endif %}
+                </td>
                 <td class="action-buttons">
                     <a href="{% url 'edit_user' user.user.id %}">Editar</a> |
                     <a href="{% url 'delete_user' user.user.id %}" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</a>

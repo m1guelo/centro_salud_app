@@ -21,12 +21,14 @@ class UserRegisterForm(UserCreationForm):
         user = super().save(commit=False)
         if commit:
             user.save()
-            # Crear el perfil de usuario relacionado
-            UserProfile.objects.create(
+            # Crear o actualizar el perfil de usuario relacionado
+            UserProfile.objects.update_or_create(
                 user=user,
-                full_name=self.cleaned_data['full_name'],
-                rut=self.cleaned_data['rut'],
-                user_type=self.cleaned_data['user_type'],
+                defaults={
+                    'full_name': self.cleaned_data['full_name'],
+                    'rut': self.cleaned_data['rut'],
+                    'user_type': self.cleaned_data['user_type'],
+                },
             )
         return user
 
@@ -38,9 +40,12 @@ class UserRegisterForm(UserCreationForm):
 
     def clean_rut(self):
         rut = self.cleaned_data.get("rut")
-        if not rut.isdigit() or len(rut) < 8:
+        # Eliminar puntos y guiones para validar numéricamente
+        normalized_rut = rut.replace(".", "").replace("-", "")
+        if not normalized_rut.isdigit() or len(normalized_rut) < 8:
             raise forms.ValidationError("El RUT debe ser numérico y tener al menos 8 dígitos.")
         return rut
+
 
 # Formulario de Perfil de Usuario (Edición)
 class UserProfileForm(forms.ModelForm):
@@ -149,3 +154,50 @@ class CompensationRequestForm(forms.ModelForm):
             self.fields['rut'].initial = profile.rut
             self.fields['position'].initial = profile.position
             self.fields['establishment'].initial = profile.establishment
+
+class UserEditForm(forms.ModelForm):
+    email = forms.EmailField(required=True, label="Correo Electrónico")
+    full_name = forms.CharField(max_length=100, required=True, label="Nombre Completo")
+    rut = forms.CharField(max_length=12, required=True, label="RUT")
+    user_type = forms.ChoiceField(
+        choices=UserProfile.USER_TYPE_CHOICES,
+        label="Tipo de Usuario",
+    )
+    position = forms.ChoiceField(
+        choices=UserProfile.CARGO_CHOICES,
+        required=False,
+        label="Cargo",
+    )
+    establishment = forms.ChoiceField(
+        choices=UserProfile.DEPARTAMENTO_CHOICES,
+        required=False,
+        label="Establecimiento",
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+    def __init__(self, *args, **kwargs):
+        self.profile = kwargs.pop("profile", None)  # Se pasa el perfil explícitamente
+        super().__init__(*args, **kwargs)
+        if self.profile:
+            self.fields["full_name"].initial = self.profile.full_name
+            self.fields["rut"].initial = self.profile.rut
+            self.fields["user_type"].initial = self.profile.user_type
+            self.fields["position"].initial = self.profile.position
+            self.fields["establishment"].initial = self.profile.establishment
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            if self.profile:
+                # Actualizamos los campos del perfil relacionado
+                self.profile.full_name = self.cleaned_data["full_name"]
+                self.profile.rut = self.cleaned_data["rut"]
+                self.profile.user_type = self.cleaned_data["user_type"]
+                self.profile.position = self.cleaned_data.get("position")
+                self.profile.establishment = self.cleaned_data.get("establishment")
+                self.profile.save()
+        return user
