@@ -452,7 +452,7 @@ def generate_user_permission_pdf(request, permission_id):
             PermissionRequest, id=permission_id, user=request.user
         )
 
-        # Renderizar el PDF sin restricciones de estado
+        # Renderizar el PDF con los datos del aprobador
         return _generate_pdf(
             template_name="permission_pdf_template.html",
             context={
@@ -465,6 +465,8 @@ def generate_user_permission_pdf(request, permission_id):
                 "date_to": permission.date_to,
                 "estado": permission.estado,
                 "firma_funcionario": permission.firma_funcionario,
+                "approved_by": permission.approved_by,  # Nombre del aprobador
+                "approver_signature": permission.approver_signature,  # Firma del aprobador
             },
             filename=f"Solicitud_Feriado_{permission_id}.pdf",
         )
@@ -486,7 +488,7 @@ def generate_admin_permission_pdf(request, permission_id):
             PermissionRequestAdmin, id=permission_id, user=request.user
         )
 
-        # Renderizar el PDF sin restricciones de estado
+        # Renderizar el PDF con los datos del aprobador
         return _generate_pdf(
             template_name="admin_permission_pdf_template.html",
             context={
@@ -499,6 +501,8 @@ def generate_admin_permission_pdf(request, permission_id):
                 "date_to": permission.date_to,
                 "estado": permission.estado,
                 "firma_funcionario": permission.firma_funcionario,
+                "approved_by": permission.approved_by,  # Nombre del aprobador
+                "approver_signature": permission.approver_signature,  # Firma del aprobador
             },
             filename=f"Permiso_Admin_{permission_id}.pdf",
         )
@@ -520,7 +524,7 @@ def generate_compensation_request_pdf(request, request_id):
             CompensationRequest, id=request_id, user=request.user
         )
 
-        # Renderizar el PDF sin restricciones de estado
+        # Renderizar el PDF con los datos del aprobador
         return _generate_pdf(
             template_name="compensation_pdf_template.html",
             context={
@@ -535,6 +539,8 @@ def generate_compensation_request_pdf(request, request_id):
                 "time_to": compensation_request.time_to,
                 "estado": compensation_request.estado,
                 "firma_funcionario": compensation_request.firma_funcionario,
+                "approved_by": compensation_request.approved_by,  # Nombre del aprobador
+                "approver_signature": compensation_request.approver_signature,  # Firma del aprobador
             },
             filename=f"Compensacion_{request_id}.pdf",
         )
@@ -571,6 +577,7 @@ def _generate_pdf(template_name, context, filename):
 
     except Exception as e:
         raise RuntimeError(f"Error al generar el PDF: {str(e)}")
+
 
 @login_required
 #@user_is_admin_or_personal_administrativo

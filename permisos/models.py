@@ -121,6 +121,8 @@ class PermissionRequest(models.Model):
     additional_date_to = models.DateField("Fecha adicional hasta", null=True, blank=True)
     firma_funcionario = models.FileField("Firma del funcionario", upload_to='firmas/', null=True, blank=True)
     estado = models.CharField("Estado", max_length=13, choices=ESTADO_CHOICES, default='pendiente')  # Incrementado a 13 caracteres
+    approved_by = models.CharField("Aprobado por", max_length=100, blank=True, null=True)
+    approver_signature = models.ImageField("Firma del aprobador", upload_to="firmas_aprobadores/", null=True, blank=True)
 
     # Campos adicionales
     created_at = models.DateTimeField("Fecha de creación", auto_now_add=True)
@@ -134,8 +136,6 @@ class PermissionRequest(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.request_type} - {self.number_of_days} días desde {self.date_from} - Estado: {self.estado}"
-
-
 
 
 class PermissionRequestAdmin(models.Model):
@@ -185,7 +185,6 @@ class CompensationRequest(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.number_of_hours} horas desde {self.date_from}"
-
 
 
 class Permission(models.Model):

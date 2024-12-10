@@ -7,9 +7,14 @@
     <h2>Crear Nuevo Usuario</h2>
 
     <!-- Mostrar mensajes de error globales -->
-    {% if form.errors %}
+    {% if form.non_field_errors %}
     <div class="global-error-messages">
         <p>Por favor, corrija los errores a continuación:</p>
+        <ul>
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
     </div>
     {% endif %}
 
@@ -25,7 +30,11 @@
             {% endif %}
             {% if field.errors %}
             <div class="error-messages">
-                {{ field.errors }}
+                <ul>
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
         </div>
@@ -34,6 +43,15 @@
         <!-- Botón de envío -->
         <button type="submit" class="btn btn-primary">Crear Usuario</button>
     </form>
+
+    <!-- Mensaje de éxito -->
+    {% if messages %}
+    <div class="success-messages">
+        {% for message in messages %}
+        <p class="message">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <!-- Botón para volver -->
     <div class="back-link">

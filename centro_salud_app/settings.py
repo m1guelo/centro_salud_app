@@ -134,3 +134,5 @@ STATICFILES_DIRS = [
     BASE_DIR / 'permisos/static',  # Ruta a la carpeta estática dentro de la aplicación permisos
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+DEBUG = True
