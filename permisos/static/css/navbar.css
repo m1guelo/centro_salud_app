@@ -10,27 +10,60 @@ nav {
 
 nav img {
     height: 80px;
+    margin-bottom: 0; /* Elimina cualquier margen que cause la barra */
 }
 
 nav a {
-    color: #fff;
+    position: relative;
+    color: #ffa500; /* Color naranja */
     text-decoration: none;
     margin: 0 15px;
-    font-size: 16px;
+    font-size: 20px; /* Incrementa el tamaño de fuente */
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
 }
 
+nav a:hover {
+    color: #ffc04d; /* Un tono más claro de naranja */
+}
+
+/* Barra animada debajo del texto */
+nav a::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #ffa500; /* Color naranja */
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Dropdown estilos */
 nav .dropdown {
     position: relative;
     display: inline-block;
 }
 
 nav .dropdown-content {
-    display: none;
+    visibility: hidden;
+    opacity: 0;
     position: absolute;
+    top: 100%; /* Asegura que la lista se ubique justo debajo del elemento */
+    margin-top: 10px; /* Añade un margen para separarlo más del texto del navbar */
     background-color: #fff;
     min-width: 200px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 1;
+    border-radius: 5px; /* Redondea las esquinas */
+    overflow: hidden;
+    transition: visibility 0.3s ease, opacity 0.3s ease;
 }
 
 nav .dropdown-content a {
@@ -38,12 +71,39 @@ nav .dropdown-content a {
     padding: 10px 15px;
     text-decoration: none;
     display: block;
+    transition: all 0.3s ease; /* Suaviza las transiciones */
 }
 
+nav .dropdown-content a:hover {
+    background-color: #ffa500; /* Cambia el fondo al pasar el mouse */
+    color: #fff; /* Cambia el color del texto al pasar el mouse */
+}
+
+/* Agrega un borde animado debajo de los enlaces del dropdown */
+nav .dropdown-content a::after {
+    content: "";
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #ffa500;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+nav .dropdown-content a:hover::after {
+    width: 100%;
+}
+
+/* Muestra el menú desplegable al hacer hover */
 nav .dropdown:hover .dropdown-content {
-    display: block;
+    visibility: visible;
+    opacity: 1;
 }
 
-nav a:hover {
-    text-decoration: underline;
+/* Mantén el menú desplegable visible al pasar el cursor sobre él */
+nav .dropdown-content:hover {
+    visibility: visible;
+    opacity: 1;
 }
