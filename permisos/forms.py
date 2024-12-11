@@ -16,37 +16,42 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if not email or "@" not in email:
+            raise forms.ValidationError("Ingrese un correo electrónico válido.")
+        return email
+
+    def clean_rut(self):
+        rut = self.cleaned_data.get("rut")
+        normalized_rut = rut.replace(".", "").replace("-", "")
+        if not normalized_rut.isdigit() or len(normalized_rut) < 8:
+            raise forms.ValidationError("El RUT debe ser numérico y tener al menos 8 dígitos.")
+        return rut
+
     def save(self, commit=True):
         # Crear el usuario base
         user = super().save(commit=False)
         if commit:
             user.save()
-            # Crear el perfil relacionado
-            user_profile = UserProfile.objects.create(
+            # Crear o actualizar el perfil relacionado
+            user_profile, created = UserProfile.objects.get_or_create(
                 user=user,
-                full_name=self.cleaned_data.get('full_name'),
-                rut=self.cleaned_data.get('rut'),
-                user_type=self.cleaned_data.get('user_type'),
+                defaults={
+                    "full_name": self.cleaned_data.get("full_name"),
+                    "rut": self.cleaned_data.get("rut"),
+                    "user_type": self.cleaned_data.get("user_type"),
+                },
             )
-            user_profile.save()
+            # Actualizar el perfil si ya existía
+            if not created:
+                user_profile.full_name = self.cleaned_data.get("full_name")
+                user_profile.rut = self.cleaned_data.get("rut")
+                user_profile.user_type = self.cleaned_data.get("user_type")
+                user_profile.save()
         return user
-
-
-def clean_email(self):
-    email = self.cleaned_data.get("email")
-    if not email or "@" not in email:
-        raise forms.ValidationError("Ingrese un correo electrónico válido.")
-    return email
-
-def clean_rut(self):
-    rut = self.cleaned_data.get("rut")
-        # Eliminar puntos y guiones para validar numéricamente
-    normalized_rut = rut.replace(".", "").replace("-", "")
-    if not normalized_rut.isdigit() or len(normalized_rut) < 8:
-        raise forms.ValidationError("El RUT debe ser numérico y tener al menos 8 dígitos.")
-    return rut
-
-
+    
+    
 # Formulario de Perfil de Usuario (Edición)
 class UserProfileForm(forms.ModelForm):
     class Meta:

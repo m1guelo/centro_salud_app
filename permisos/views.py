@@ -134,11 +134,25 @@ def create_user(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             try:
-                form.save()
+                # Crear el usuario
+                user = form.save(commit=False)
+                user.set_password(form.cleaned_data["password"])
+                user.save()
+
+                # Crear el perfil relacionado
+                UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        "full_name": form.cleaned_data.get("full_name"),
+                        "rut": form.cleaned_data.get("rut"),
+                        "user_type": form.cleaned_data.get("user_type"),
+                    },
+                )
+
                 messages.success(request, "Usuario creado exitosamente.")
                 return redirect("user_management")
-            except Exception as e:
-                messages.error(request, f"Error al crear el usuario: {str(e)}")
+            except IntegrityError as e:
+                messages.error(request, f"Error: {str(e)}")
         else:
             messages.error(request, "Por favor, corrija los errores del formulario.")
     else:

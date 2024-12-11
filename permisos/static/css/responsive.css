@@ -1,23 +1,61 @@
-/* Estilos responsivos */
-@media (max-width: 768px) {
-    .form-container {
-        margin: 20px 10px;
-        padding: 20px;
+/* Estilos responsivos generales */
+@media (max-width: 1024px) {
+    nav {
+        flex-wrap: wrap;
+        justify-content: space-between; /* Mejor distribución */
     }
 
-    .form-group button {
-        width: 100%;
+    .table-container {
+        padding: 10px;
+        margin: 10px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-container {
+        margin: 10px;
+        padding: 10px;
+    }
+
+    th, td {
+        font-size: 12px;
+        padding: 5px;
+    }
+
+    nav a {
+        margin: 10px 0;
+        font-size: 14px; /* Ajusta tamaño de fuente en navbar */
     }
 
     .search-form input {
         width: 100%;
     }
 
-    nav {
-        flex-wrap: wrap;
-    }
-
-    nav a {
-        margin: 10px 0;
+    .dataTables_wrapper {
+        font-size: 12px;
+        flex-direction: column; /* Elementos apilados en pantallas pequeñas */
     }
 }
+
+@media (max-width: 480px) {
+    .form-container {
+        padding: 5px;
+    }
+
+    table {
+        font-size: 10px;
+    }
+
+    .search-form button {
+        width: 100%;
+    }
+
+    nav {
+        font-size: 12px;
+    }
+}
+

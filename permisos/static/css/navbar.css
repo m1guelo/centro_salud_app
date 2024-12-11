@@ -6,6 +6,9 @@ nav {
     background-color: #27599d;
     padding: 10px 20px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky; /* Permite que la barra quede fija al desplazarse */
+    top: 0;
+    z-index: 1000;
 }
 
 nav img {
@@ -106,4 +109,21 @@ nav .dropdown:hover .dropdown-content {
 nav .dropdown-content:hover {
     visibility: visible;
     opacity: 1;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    nav {
+        flex-wrap: wrap;
+        padding: 10px;
+    }
+
+    nav a {
+        font-size: 18px;
+        margin: 5px;
+    }
+
+    nav img {
+        height: 60px; /* Ajuste de tamaño para pantallas pequeñas */
+    }
 }

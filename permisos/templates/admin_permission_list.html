@@ -3,47 +3,81 @@
 {% block title %}Listado de Solicitudes de Permiso Administrativo{% endblock %}
 
 {% block content %}
-<div class="table-container">
+<div>
+    <!-- Título principal -->
     <h2>Listado de Solicitudes de Permiso Administrativo</h2>
-    <form class="search-form" method="GET" action="{% url 'admin_permission_list' %}">
-        <input type="text" name="q" value="{{ query }}" placeholder="Buscar por nombre o RUT">
+
+    <!-- Formulario de búsqueda -->
+    <form method="GET" action="{% url 'admin_permission_list' %}">
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="Buscar por nombre o RUT" 
+            value="{{ query }}">
         <button type="submit">Buscar</button>
     </form>
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>RUT</th>
-                <th>Número de Días</th>
-                <th>Fecha Desde</th>
-                <th>Fecha Hasta</th>
-                <th>Jornada</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for permission in admin_permissions %}
-            <tr>
-                <td>{{ permission.full_name }}</td>
-                <td>{{ permission.rut }}</td>
-                <td>{{ permission.number_of_days }}</td>
-                <td>{{ permission.date_from }}</td>
-                <td>{{ permission.date_to }}</td>
-                <td>{{ permission.jornada }}</td>
-                <td>{{ permission.estado|title }}</td>
-                <td>
-                    <a href="{% url 'admin_permission_admin_detail' permission.id %}">Autorizar/Editar</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8">No se encontraron solicitudes de permisos administrativos.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
+
+    <!-- Tabla de permisos -->
+    <div>
+        <table id="permissionTable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>RUT</th>
+                    <th>Días</th>
+                    <th>Desde</th>
+                    <th>Hasta</th>
+                    <th>Jornada</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for permission in admin_permissions %}
+                <tr>
+                    <td>{{ permission.full_name }}</td>
+                    <td>{{ permission.rut }}</td>
+                    <td>{{ permission.number_of_days }}</td>
+                    <td>{{ permission.date_from }}</td>
+                    <td>{{ permission.date_to }}</td>
+                    <td>{{ permission.jornada }}</td>
+                    <td>{{ permission.estado|title }}</td>
+                    <td>
+                        <a href="{% url 'admin_permission_admin_detail' permission.id %}">Autorizar/Editar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No se encontraron solicitudes de permisos administrativos.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
+<!-- DataTables Initialization -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $('#permissionTable').DataTable({
+      language: {
+        search: "Buscar:",
+        lengthMenu: "Mostrar _MENU_ registros por página",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        paginate: {
+          previous: "Anterior",
+          next: "Siguiente"
+        }
+      },
+      paging: true,
+      searching: true,
+      ordering: true,
+      responsive: true,
+      autoWidth: false
+    });
+  });
+</script>
 {% endblock %}

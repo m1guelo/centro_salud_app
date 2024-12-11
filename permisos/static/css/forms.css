@@ -1,155 +1,83 @@
-/* Contenedor del formulario */
+/* Ajustes generales */
 .form-container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px 40px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 /* Título del formulario */
-h2 {
+.form-container h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #27599d;
+    font-size: 1.8rem;
+    font-weight: bold;
 }
 
-/* Diseño en cuadrícula */
+/* Grupos de formulario con estructura de columnas */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
-/* Grupos de formulario */
-.form-group {
-    margin-bottom: 15px;
+.form-grid .form-group {
+    display: flex;
+    flex-direction: column;
 }
 
+/* Etiquetas */
 .form-group label {
     font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
+    margin-bottom: 8px;
+    color: #333;
 }
 
+/* Inputs, selects y textarea */
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
     padding: 10px;
-    font-size: 16px;
+    font-size: 1rem;
     border: 1px solid #ced4da;
     border-radius: 5px;
     background-color: #f8f9fa;
 }
 
-/* Foco en campos */
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: #27599d;
-    outline: none;
-    box-shadow: 0 0 5px rgba(39, 89, 157, 0.5);
-}
-
-/* Botones */
-.form-actions {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.btn-submit {
+/* Botón de envío */
+.form-container .btn-submit {
     background-color: #27599d;
     color: white;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: bold;
-    border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.btn-submit:hover {
-    background-color: #124ea1;
-}
-
-.btn-cancel {
-    background-color: #6c757d;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-left: 10px;
-}
-
-.btn-cancel:hover {
-    background-color: #5a6268;
-}
-
-/* Ajustes para mensajes de error */
-input:invalid {
-    border-color: red;
-}
-
-/* Contenedor del grupo de radio buttons */
-.radio-group {
-    display: flex;
-    flex-wrap: wrap; /* Asegura compatibilidad en pantallas pequeñas */
-    gap: 10px; /* Espaciado entre opciones */
-    padding: 15px;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-}
-
-/* Estilo para cada opción */
-.radio-option {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Espaciado entre el botón y el texto */
-    cursor: pointer;
-}
-
-/* Ocultar el radio button clásico */
-.radio-option input[type="radio"] {
-    display: none;
-}
-
-/* Estilo para el botón personalizado */
-.radio-option span {
-    padding: 8px 15px;
-    border: 2px solid #27599d;
-    border-radius: 5px;
-    color: #27599d;
-    background-color: #fff;
+    width: 100%;
     transition: all 0.3s ease;
 }
 
-/* Efecto hover */
-.radio-option span:hover {
-    background-color: #27599d;
-    color: #fff;
+.form-container .btn-submit:hover {
+    background-color: #124ea1;
 }
 
-/* Estilo cuando está seleccionado */
-.radio-option input[type="radio"]:checked + span {
-    background-color: #27599d;
-    color: #fff;
-    border-color: #27599d;
+/* Estilo para mensajes de error */
+input:invalid {
+    border-color: red;
 }
 
 /* Responsividad */
 @media (max-width: 768px) {
     .form-grid {
-        grid-template-columns: 1fr; /* Columna única en pantallas pequeñas */
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+    }
+
+    .form-group {
+        margin-bottom: 15px;
     }
 }
-
 

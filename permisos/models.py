@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 def validate_rut(value):
     normalized_rut = value.replace(".", "").replace("-", "")
@@ -86,6 +88,16 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.get_user_type_display()}"
 
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'userprofile'):
+        instance.userprofile.save()
+        
 class PermissionRequest(models.Model):
     # Opciones específicas para el estado y tipo de solicitud
     ESTADO_CHOICES = [
