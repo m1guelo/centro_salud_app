@@ -3,10 +3,10 @@ from django.template.loader import render_to_string
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
-from .decorators import user_is_admin, user_is_admin_or_personal_administrativo
+from .decorators import user_is_admin, user_is_normal, user_has_access, user_is_admin_or_normal
 from django import forms
 from django.db import IntegrityError
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
@@ -108,48 +108,55 @@ def complete_profile(request):
 
 
 @login_required
-#@user_is_admin
 def user_management(request):
-    # Consulta todos los perfiles y usuarios relacionados
     users = UserProfile.objects.select_related("user").all()
 
-    # Asegurarse de manejar valores nulos o vacíos
+    # Asegúrate de manejar valores nulos o campos vacíos
     for user in users:
-        if not user.position:
-            user.position = "No especificado"
-        if not user.establishment:
-            user.establishment = "No especificado"
-        if not user.permissions:
-            user.permissions = "No asignado"
+        user.full_name = user.full_name or "No especificado"
+        user.rut = user.rut or "No especificado"
+        user.position = user.position or "No especificado"
+        user.establishment = user.establishment or "No especificado"
+        user.user_type = user.user_type or "No especificado"
 
     return render(request, "user_management.html", {"users": users})
 
-from django.contrib import messages
-
-from django.contrib import messages
-
 @login_required
+@user_is_admin
 def create_user(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             try:
-                # Crear el usuario
+                # Crear el usuario base
                 user = form.save(commit=False)
-                user.set_password(form.cleaned_data["password"])
+                user.set_password(form.cleaned_data["password1"])
+                
+                # Determinar si es administrador
+                user_type = form.cleaned_data.get("user_type", "usuario_normal")
+                user.is_staff = True if user_type == "admin" else False
                 user.save()
 
-                # Crear el perfil relacionado
-                UserProfile.objects.get_or_create(
+                # Crear o actualizar el perfil relacionado
+                user_profile, created = UserProfile.objects.get_or_create(
                     user=user,
                     defaults={
-                        "full_name": form.cleaned_data.get("full_name"),
-                        "rut": form.cleaned_data.get("rut"),
-                        "user_type": form.cleaned_data.get("user_type"),
+                        "full_name": form.cleaned_data.get("full_name", "No especificado"),
+                        "rut": form.cleaned_data.get("rut", "No especificado"),
+                        "user_type": user_type,
+                        "position": form.cleaned_data.get("position", "No especificado"),
+                        "establishment": form.cleaned_data.get("establishment", "No especificado"),
                     },
                 )
+                if not created:
+                    user_profile.full_name = form.cleaned_data.get("full_name", "No especificado")
+                    user_profile.rut = form.cleaned_data.get("rut", "No especificado")
+                    user_profile.user_type = user_type
+                    user_profile.position = form.cleaned_data.get("position", "No especificado")
+                    user_profile.establishment = form.cleaned_data.get("establishment", "No especificado")
+                    user_profile.save()
 
-                messages.success(request, "Usuario creado exitosamente.")
+                messages.success(request, f"Usuario '{user.username}' creado exitosamente.")
                 return redirect("user_management")
             except IntegrityError as e:
                 messages.error(request, f"Error: {str(e)}")
@@ -157,9 +164,7 @@ def create_user(request):
             messages.error(request, "Por favor, corrija los errores del formulario.")
     else:
         form = UserRegisterForm()
-
     return render(request, "create_user.html", {"form": form})
-
 
 
 @login_required
@@ -457,38 +462,20 @@ def compensation_request_detail(request, request_id):
 # Generación de PDFs
 # ----------------------------
 
+from django.conf import settings
+from django.templatetags.static import static
 
 @login_required
 def generate_user_permission_pdf(request, permission_id):
     try:
-        # Obtén el permiso asociado
-        permission = get_object_or_404(
-            PermissionRequest, id=permission_id, user=request.user
-        )
+        permission = get_object_or_404(PermissionRequest, id=permission_id, user=request.user)
 
-        # Renderizar el PDF con los datos del aprobador
-        return _generate_pdf(
-            template_name="permission_pdf_template.html",
-            context={
-                "permission": permission,
-                "full_name": permission.full_name,
-                "rut": permission.rut,
-                "position": permission.position,
-                "establishment": permission.establishment,
-                "date_from": permission.date_from,
-                "date_to": permission.date_to,
-                "estado": permission.estado,
-                "firma_funcionario": permission.firma_funcionario,
-                "approved_by": permission.approved_by,  # Nombre del aprobador
-                "approver_signature": permission.approver_signature,  # Firma del aprobador
-            },
-            filename=f"Solicitud_Feriado_{permission_id}.pdf",
-        )
+        context = {
+            "permission": permission,
+            "logo_url": request.build_absolute_uri(static("img/logo.png")),  # URL absoluta
+        }
 
-    except PermissionRequest.DoesNotExist:
-        messages.error(request, "El permiso solicitado no existe.")
-        return redirect("user_permission_status_feriado")
-
+        return _generate_pdf("permission_pdf_template.html", context, f"Feriado_Legal_{permission_id}.pdf")
     except Exception as e:
         messages.error(request, f"Error inesperado al generar el PDF: {str(e)}")
         return redirect("user_permission_status_feriado")
@@ -497,34 +484,14 @@ def generate_user_permission_pdf(request, permission_id):
 @login_required
 def generate_admin_permission_pdf(request, permission_id):
     try:
-        # Obtén el permiso administrativo asociado
-        permission = get_object_or_404(
-            PermissionRequestAdmin, id=permission_id, user=request.user
-        )
+        permission = get_object_or_404(PermissionRequestAdmin, id=permission_id, user=request.user)
 
-        # Renderizar el PDF con los datos del aprobador
-        return _generate_pdf(
-            template_name="admin_permission_pdf_template.html",
-            context={
-                "permission": permission,
-                "full_name": permission.full_name,
-                "rut": permission.rut,
-                "position": permission.position,
-                "establishment": permission.establishment,
-                "date_from": permission.date_from,
-                "date_to": permission.date_to,
-                "estado": permission.estado,
-                "firma_funcionario": permission.firma_funcionario,
-                "approved_by": permission.approved_by,  # Nombre del aprobador
-                "approver_signature": permission.approver_signature,  # Firma del aprobador
-            },
-            filename=f"Permiso_Admin_{permission_id}.pdf",
-        )
+        context = {
+            "permission": permission,
+            "logo_url": request.build_absolute_uri(static("img/logo.png")),  # URL absoluta
+        }
 
-    except PermissionRequestAdmin.DoesNotExist:
-        messages.error(request, "El permiso administrativo solicitado no existe.")
-        return redirect("user_permission_status_administrativo")
-
+        return _generate_pdf("permission_pdf_template.html", context, f"Permiso_Admin_{permission_id}.pdf")
     except Exception as e:
         messages.error(request, f"Error inesperado al generar el PDF: {str(e)}")
         return redirect("user_permission_status_administrativo")
@@ -533,42 +500,24 @@ def generate_admin_permission_pdf(request, permission_id):
 @login_required
 def generate_compensation_request_pdf(request, request_id):
     try:
-        # Obtén la solicitud de compensación asociada
-        compensation_request = get_object_or_404(
-            CompensationRequest, id=request_id, user=request.user
-        )
+        compensation_request = get_object_or_404(CompensationRequest, id=request_id, user=request.user)
 
-        # Renderizar el PDF con los datos del aprobador
-        return _generate_pdf(
-            template_name="compensation_pdf_template.html",
-            context={
-                "compensation_request": compensation_request,
-                "full_name": compensation_request.full_name,
-                "rut": compensation_request.rut,
-                "position": compensation_request.position,
-                "establishment": compensation_request.establishment,
-                "date_from": compensation_request.date_from,
-                "date_to": compensation_request.date_to,
-                "time_from": compensation_request.time_from,
-                "time_to": compensation_request.time_to,
-                "estado": compensation_request.estado,
-                "firma_funcionario": compensation_request.firma_funcionario,
-                "approved_by": compensation_request.approved_by,  # Nombre del aprobador
-                "approver_signature": compensation_request.approver_signature,  # Firma del aprobador
-            },
-            filename=f"Compensacion_{request_id}.pdf",
-        )
+        context = {
+            "permission": compensation_request,  # Usamos 'permission' para reutilizar la plantilla
+            "logo_url": request.build_absolute_uri(static("img/logo.png")),  # URL absoluta
+        }
 
-    except CompensationRequest.DoesNotExist:
-        messages.error(request, "La solicitud de compensación no existe.")
-        return redirect("user_permission_status_compensacion")
-
+        return _generate_pdf("permission_pdf_template.html", context, f"Compensacion_{request_id}.pdf")
     except Exception as e:
         messages.error(request, f"Error inesperado al generar el PDF: {str(e)}")
         return redirect("user_permission_status_compensacion")
 
 
+
 def _generate_pdf(template_name, context, filename):
+    """
+    Función genérica para generar un PDF basado en una plantilla HTML.
+    """
     try:
         # Renderizar el contenido del PDF
         html_string = render_to_string(template_name, context)
@@ -588,7 +537,6 @@ def _generate_pdf(template_name, context, filename):
             response = HttpResponse(pdf_file.read(), content_type="application/pdf")
             response["Content-Disposition"] = f'attachment; filename="{filename}"'
             return response
-
     except Exception as e:
         raise RuntimeError(f"Error al generar el PDF: {str(e)}")
 

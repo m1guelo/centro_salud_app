@@ -2,56 +2,109 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compensación de Tiempo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 40px;
         }
-        h1 {
+
+        .header {
             text-align: center;
-            color: #27599d;
-        }
-        .section {
             margin-bottom: 20px;
         }
-        .field {
-            margin-bottom: 10px;
+
+        .header img {
+            height: 70px;
         }
-        .field strong {
-            color: #555;
+
+        .section-title {
+            font-weight: bold;
+            text-align: center;
+            text-decoration: underline;
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+        }
+
+        .signature {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .signature p {
+            margin: 5px 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            text-align: justify;
         }
     </style>
 </head>
 <body>
-    <h1>Compensación de Tiempo</h1>
+    <div class="header">
+        <img src="{{ logo_url }}" alt="Logo Departamento de Salud Parral">
+        <p>Departamento de Salud Parral<br>Unidad de Personal</p>
+    </div>    
 
-    <div class="section">
-        <h2>Detalles del Solicitante</h2>
-        <div class="field"><strong>Nombre completo:</strong> {{ compensation_request.full_name }}</div>
-        <div class="field"><strong>RUT:</strong> {{ compensation_request.rut }}</div>
-        <div class="field"><strong>Cargo:</strong> {{ compensation_request.position }}</div>
-        <div class="field"><strong>Establecimiento:</strong> {{ compensation_request.establishment }}</div>
-    </div>
+    <h2 class="section-title">Compensación de Tiempo</h2>
 
-    <div class="section">
-        <h2>Detalles de la Compensación</h2>
-        <div class="field"><strong>Fecha desde:</strong> {{ compensation_request.date_from }}</div>
-        <div class="field"><strong>Fecha hasta:</strong> {{ compensation_request.date_to }}</div>
-        <div class="field"><strong>Horario desde:</strong> {{ compensation_request.time_from }}</div>
-        <div class="field"><strong>Horario hasta:</strong> {{ compensation_request.time_to }}</div>
-    </div>
+    <p><strong>Fecha:</strong> {{ compensation_request.date_from }}</p>
 
-    <div class="section">
-        <h2>Estado y Firma</h2>
-        <div class="field"><strong>Estado:</strong> {{ compensation_request.estado }}</div>
-        {% if compensation_request.firma_funcionario %}
-        <div class="field"><strong>Firma del Administrador:</strong></div>
-        <img src="{{ compensation_request.firma_funcionario.url }}" alt="Firma" width="200">
-        {% else %}
-        <div class="field"><strong>Firma del Administrador:</strong> No disponible</div>
-        {% endif %}
+    <table class="table">
+        <tr>
+            <th>Nombre Completo</th>
+            <td>{{ compensation_request.full_name }}</td>
+            <th>RUT</th>
+            <td>{{ compensation_request.rut }}</td>
+        </tr>
+        <tr>
+            <th>Cargo</th>
+            <td>{{ compensation_request.position }}</td>
+            <th>Establecimiento</th>
+            <td>{{ compensation_request.establishment }}</td>
+        </tr>
+    </table>
+
+    <h3 class="section-title">Detalles de la Compensación</h3>
+    <table class="table">
+        <tr>
+            <th>Desde</th>
+            <td>{{ compensation_request.date_from }}</td>
+            <th>Hasta</th>
+            <td>{{ compensation_request.date_to }}</td>
+        </tr>
+        <tr>
+            <th>Hora Desde</th>
+            <td>{{ compensation_request.time_from }}</td>
+            <th>Hora Hasta</th>
+            <td>{{ compensation_request.time_to }}</td>
+        </tr>
+        <tr>
+            <th>Estado</th>
+            <td>{{ compensation_request.estado }}</td>
+        </tr>
+    </table>
+
+    <div class="signature">
+        <p>_____________________________</p>
+        <p>Firma del Solicitante</p>
     </div>
 </body>
 </html>

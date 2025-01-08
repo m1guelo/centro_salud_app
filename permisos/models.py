@@ -73,7 +73,6 @@ class UserProfile(models.Model):
     USER_TYPE_CHOICES = [
         ('usuario_normal', 'Usuario Normal'),
         ('admin', 'Administrador'),
-        ('personal_administrativo', 'Personal Administrativo'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)

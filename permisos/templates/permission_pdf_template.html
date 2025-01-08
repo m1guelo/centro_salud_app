@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Solicitud de Feriado Legal</title>
+    <title>Solicitud de Permiso</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,12 +60,12 @@
 <body>
     <!-- Header -->
     <div class="header">
-        <img src="https://via.placeholder.com/150x50" alt="Logo Departamento de Salud Parral">
+        <img src="{{ logo_url }}" alt="Logo Departamento de Salud Parral">
         <p>Departamento de Salud Parral<br>Unidad de Personal</p>
     </div>
 
     <!-- Title -->
-    <h2 class="section-title">SOLICITUD DE FERIADO LEGAL</h2>
+    <h2 class="section-title">SOLICITUD DE PERMISO</h2>
 
     <!-- Fecha -->
     <p><strong>Fecha:</strong> {{ permission.date_from }}</p>
@@ -126,7 +126,6 @@
                 {% endif %}
             </td>
         </tr>
-        
         <tr>
             <th>Autorizado</th>
             <td>{{ permission.autorizado|yesno:"Sí,No" }}</td>

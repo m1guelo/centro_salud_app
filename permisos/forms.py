@@ -10,47 +10,52 @@ class UserRegisterForm(UserCreationForm):
     user_type = forms.ChoiceField(
         choices=UserProfile.USER_TYPE_CHOICES,
         label="Tipo de Usuario",
+        required=True,
     )
 
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-    def clean_email(self):
-        email = self.cleaned_data.get("email")
-        if not email or "@" not in email:
-            raise forms.ValidationError("Ingrese un correo electrónico válido.")
-        return email
-
-    def clean_rut(self):
-        rut = self.cleaned_data.get("rut")
-        normalized_rut = rut.replace(".", "").replace("-", "")
-        if not normalized_rut.isdigit() or len(normalized_rut) < 8:
-            raise forms.ValidationError("El RUT debe ser numérico y tener al menos 8 dígitos.")
-        return rut
-
     def save(self, commit=True):
-        # Crear el usuario base
         user = super().save(commit=False)
         if commit:
             user.save()
+
             # Crear o actualizar el perfil relacionado
             user_profile, created = UserProfile.objects.get_or_create(
                 user=user,
                 defaults={
-                    "full_name": self.cleaned_data.get("full_name"),
-                    "rut": self.cleaned_data.get("rut"),
-                    "user_type": self.cleaned_data.get("user_type"),
+                    "full_name": self.cleaned_data.get("full_name", "No especificado"),
+                    "rut": self.cleaned_data.get("rut", "No especificado"),
+                    "user_type": self.cleaned_data.get("user_type", "usuario_normal"),
                 },
             )
-            # Actualizar el perfil si ya existía
             if not created:
-                user_profile.full_name = self.cleaned_data.get("full_name")
-                user_profile.rut = self.cleaned_data.get("rut")
-                user_profile.user_type = self.cleaned_data.get("user_type")
+                user_profile.full_name = self.cleaned_data.get("full_name", "No especificado")
+                user_profile.rut = self.cleaned_data.get("rut", "No especificado")
+                user_profile.user_type = self.cleaned_data.get("user_type", "usuario_normal")
                 user_profile.save()
         return user
-    
+
+
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("El correo electrónico ya está registrado.")
+        return email
+
+    def clean_rut(self):
+        rut = self.cleaned_data.get("rut", "").replace(".", "").replace("-", "")
+        if not rut.isdigit() or len(rut) < 8:
+            raise forms.ValidationError("El RUT debe ser numérico y tener al menos 8 dígitos.")
+        if UserProfile.objects.filter(rut=rut).exists():
+            raise forms.ValidationError("El RUT ya está registrado.")
+        return rut
+
+
+
     
 # Formulario de Perfil de Usuario (Edición)
 class UserProfileForm(forms.ModelForm):
@@ -167,6 +172,7 @@ class UserEditForm(forms.ModelForm):
     user_type = forms.ChoiceField(
         choices=UserProfile.USER_TYPE_CHOICES,
         label="Tipo de Usuario",
+        required=True,
     )
     position = forms.ChoiceField(
         choices=UserProfile.CARGO_CHOICES,
@@ -184,7 +190,7 @@ class UserEditForm(forms.ModelForm):
         fields = ['username', 'email']
 
     def __init__(self, *args, **kwargs):
-        self.profile = kwargs.pop("profile", None)  # Se pasa el perfil explícitamente
+        self.profile = kwargs.pop("profile", None)  # Perfil pasado explícitamente
         super().__init__(*args, **kwargs)
         if self.profile:
             self.fields["full_name"].initial = self.profile.full_name
@@ -198,12 +204,12 @@ class UserEditForm(forms.ModelForm):
         if commit:
             user.save()
             if self.profile:
-                # Actualizar el perfil relacionado
-                self.profile.full_name = self.cleaned_data.get("full_name")
-                self.profile.rut = self.cleaned_data.get("rut")
-                self.profile.user_type = self.cleaned_data.get("user_type")
-                self.profile.position = self.cleaned_data.get("position")
-                self.profile.establishment = self.cleaned_data.get("establishment")
+                self.profile.full_name = self.cleaned_data.get("full_name", "No especificado")
+                self.profile.rut = self.cleaned_data.get("rut", "No especificado")
+                self.profile.user_type = self.cleaned_data.get("user_type", "usuario_normal")
+                self.profile.position = self.cleaned_data.get("position", "No especificado")
+                self.profile.establishment = self.cleaned_data.get("establishment", "No especificado")
                 self.profile.save()
         return user
+
 
